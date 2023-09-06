@@ -1,4 +1,4 @@
-Experiment
+index
 ================
 
 ## GitHub Documents
@@ -27,7 +27,7 @@ summary(cars)
 
 You can also embed plots, for example:
 
-![](Experiment_files/figure-gfm/pressure-1.png)<!-- -->
+![](index_files/figure-gfm/pressure-1.png)<!-- -->
 
 Note that the `echo = FALSE` parameter was added to the code chunk to
 prevent printing of the R code that generated the plot.
