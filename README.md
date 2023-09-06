@@ -1,12 +1,28 @@
-# React Colors Project
+## R Markdown
 
-- A clone of websites like [Flat UI Colors](https://flatuicolors.com/) and [Material UI Colors](http://materialuicolors.co/?utm_source=launchers).
-- One of the projects for my Modern React Bootcamp course.
-- Each video has its own corresponding commit that you can follow along with.
+This is an R Markdown document. Markdown is a simple formatting syntax
+for authoring HTML, PDF, and MS Word documents. For more details on
+using R Markdown see <http://rmarkdown.rstudio.com>.
 
-![image](https://i.imgur.com/9x1F9At.png)
-![image](https://i.imgur.com/GM0etHA.png)
+When you click the **Knit** button a document will be generated that
+includes both content as well as the output of any embedded R code
+chunks within the document. You can embed an R code chunk like this:
 
-![image](https://i.imgur.com/QB2zRzf.png)
-![image](https://i.imgur.com/aFowgNg.png)
+    summary(cars)
 
+    ##      speed           dist       
+    ##  Min.   : 4.0   Min.   :  2.00  
+    ##  1st Qu.:12.0   1st Qu.: 26.00  
+    ##  Median :15.0   Median : 36.00  
+    ##  Mean   :15.4   Mean   : 42.98  
+    ##  3rd Qu.:19.0   3rd Qu.: 56.00  
+    ##  Max.   :25.0   Max.   :120.00
+
+## Including Plots
+
+You can also embed plots, for example:
+
+![](Readme_files/figure-markdown_strict/pressure-1.png)
+
+Note that the `echo = FALSE` parameter was added to the code chunk to
+prevent printing of the R code that generated the plot.
