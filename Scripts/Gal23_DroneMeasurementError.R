@@ -44,13 +44,9 @@ dat$altitude.fix <- dat$altitude + launch.chest + camera.height
 
 
 
-dat$length.fix.a <- morpho.length.alpha(altitude = dat$altitude.fix,
+dat$length.fix <- morpho.length.alpha(altitude = dat$altitude.fix,
                                       image.width = dat$ImageWidth,
                                       length.pixels = dat$pixel.length)
-
-dat$length.fix.o <- morpho.length.alpha(altitude = dat$altitude,
-                                        image.width = dat$ImageWidth,
-                                        length.pixels = dat$pixel.length) 
 
 
 hist(dat$length.fix, breaks = 200)

@@ -1,7 +1,13 @@
 ---
 title: "Consider Altitude as the Primary Source of Error"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
+```{r}
+source("/Users/anacristinaeguigurenburneo/Documents/DJI_Mini2_Measurement_Error/Scripts/Gal23_DroneMeasurementError.R")
+```
+
 If most of the error comes from altitude miscalculations, what should the altitude be given our known parameters:
 
 Fixed:
