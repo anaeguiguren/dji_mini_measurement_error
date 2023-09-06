@@ -1,0 +1,54 @@
+---
+title: "Consider Altitude as the Primary Source of Error"
+output: html_notebook
+---
+If most of the error comes from altitude miscalculations, what should the altitude be given our known parameters:
+
+Fixed:
+alpha: 1.2646
+boat length:12.03
+
+Variable:
+pixel length
+image width
+
+
+First, invert equation so a "true.altitude" can be estimated given the known values. 
+
+```{r}
+true.altitude <- function(true.length, pixel.length, image.width, alpha){
+  true.altitude = (true.length/pixel.length) * (image.width/alpha)
+}
+```
+
+Next, calculate the true.altitude
+```{r}
+dat$true.altitude <- true.altitude(true.length = 12.03, 
+                                   pixel.length = dat$pixel.length, 
+                                   image.width = dat$ImageWidth, 
+                                   alpha = 1.2646)
+```
+
+Now, estimate the altitude errors:
+```{r}
+dat$altitude.error <- dat$true.altitude-dat$altitude.fix
+hist(dat$altitude.error, xlab = "altitude error", main = "", breaks = 100)
+text(x = 20, y = 40, paste("mean error = ", signif(mean(dat$altitude.error, digits =2))))
+```
+
+Simulate the error in length estimates if we added this correction factor to the reported altitude
+```{r}
+dat$altitude.corr <- dat$altitude.fix+mean(dat$altitude.error)
+dat$length.corr <- morpho.length.alpha(altitude = dat$altitude.corr,
+                                      image.width = dat$ImageWidth,
+                                      length.pixels = dat$pixel.length)
+
+
+```
+average = 12.20
+
+vs just adding the mean length error
+```{r}
+mean(dat$length.fix.a - mean(dat$length.error))
+```
+

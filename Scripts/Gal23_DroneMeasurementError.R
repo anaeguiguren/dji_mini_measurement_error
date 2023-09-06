@@ -24,7 +24,7 @@ dat$pixel.length <- px.length(l.m=dat$length,
 # fix pixel dimensions:
 dat$pixelDimension<-NA
 
-dat$pixelDimension <- 6.3/ dat$ImageWidth
+dat$pixelDimension <- 6.3/dat$ImageWidth
 
 
 #2. Re-estimate length ----
@@ -34,20 +34,26 @@ morpho.length.alpha <- function(alpha = 1.2646,image.width, altitude, length.pix
 }
 
 #recalculate Balaena's length in m, with new altitude 
-boat.height = 1.03
-launch.chest = 1.4 - 0.24
-camera.height = 0.445
+boat.height = 1.03# balaena's altitude over the water
+
+launch.chest = 1.4 - 0.24 # Mateo's chest height
+camera.height = 0.045 # cameras distance from legs
 
 dat$altitude.fix <- dat$altitude + launch.chest + camera.height
 
 
 
 
-dat$length.fix <- morpho.length.alpha(altitude = dat$altitude.fix,
+dat$length.fix.a <- morpho.length.alpha(altitude = dat$altitude.fix,
                                       image.width = dat$ImageWidth,
                                       length.pixels = dat$pixel.length)
 
-hist(dat$length.fix, breaks = 100)
+dat$length.fix.o <- morpho.length.alpha(altitude = dat$altitude,
+                                        image.width = dat$ImageWidth,
+                                        length.pixels = dat$pixel.length) 
+
+
+hist(dat$length.fix, breaks = 200)
 mean(dat$length.fix)
 sd(dat$length.fix)
 
