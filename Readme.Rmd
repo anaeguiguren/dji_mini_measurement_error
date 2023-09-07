@@ -1,4 +1,5 @@
 ---
+title: "Bias and uncertainty in estimating length with DJI Mini 2"
 author: "Ana Eguiguren"
 date: "2023-09-06"
 output: md_document
@@ -8,14 +9,44 @@ output: md_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r, include = FALSE}
+setwd("/Users/anacristinaeguigurenburneo/Documents/DJI_Mini2_Measurement_Error/")
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+source("Scripts/Gal23_DroneMeasurementError_DataPrep.R")
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```
+
+```{r setup data, include = F}
+px.length <- function(l.m, p.d, f.l = 4.25531, a.m){
+  (l.m/p.d)*(f.l/a.m)
+  
+}
+
+#calculate pixel length:
+dat$pixel.length <- px.length(l.m=dat$length, 
+                              p.d = dat$pixelDimension.old, 
+                              a.m = dat$altitude)
+
+# fix pixel dimensions:
+dat$pixelDimension<-NA
+
+dat$pixelDimension <- 6.3/dat$ImageWidth
+dat<- dat %>% select(Date, FlightNo, imageName, timeStamp, altitudeRaw = altitude, imageWidth = ImageWidth, pixel.length, position = pos)
+
+```
+
+
+## Callibration data
+
+This Dataset has 426 images of balaena taken during different flights and dates. 
+-altitudeRaw: the altitude indicated by DJI (zeroed at takeoff).
+-imageWidth: picture's width in pixels (1920 or 3840)
+-pixel.length: Balaena's length in pixels
+-position: whether Balaena was in the center of the frame (pos_c) or closer to the edges (pos_o)
+
 
 ```{r cars}
-summary(cars)
+summary(dat)
 ```
 
 ## Including Plots
