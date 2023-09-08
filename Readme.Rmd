@@ -38,23 +38,63 @@ dat<- dat %>% select(Date, FlightNo, imageName, timeStamp, altitudeRaw = altitud
 
 ## Callibration data
 
-This Dataset has 426 images of balaena taken during different flights and dates. 
--altitudeRaw: the altitude indicated by DJI (zeroed at takeoff).
--imageWidth: picture's width in pixels (1920 or 3840)
--pixel.length: Balaena's length in pixels
--position: whether Balaena was in the center of the frame (pos_c) or closer to the edges (pos_o)
+This Dataset has 426 images of Balaena taken during different flights and dates. 
+* altitudeRaw: the altitude indicated by DJI (zeroed at takeoff).
+
+* imageWidth: picture's width in pixels (1920 or 3840).
+
+* pixel.length: Balaena's length in pixels.
+
+* position: whether Balaena was in the center of the frame (pos_c) or closer to the edges (pos_o).
 
 
-```{r cars}
-summary(dat)
+
+```{r summary}
+head(dat)
 ```
 
-## Including Plots
+## Correct initial altitude
+The drone altitude is zeroed the moment the rotors start, which means that the true altitude needs to add the distance from the drone's launch point to the water:
 
-You can also embed plots, for example:
+![depiction of how the true altitude from the water line is calculated](Graphical/altitude_diagram.jpeg)
+*note that, in Balaena's case, the altitude we want is the distance from the drone to the boat, so we can omit the boat height in the calculation as follows:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+#recalculate Balaena's length in m, with new altitude 
+boat.height = 1.03- 0.24# balaena's altitude over the water - toe rail
+
+launch.chest = 1.4 # Mateo's chest height
+camera.height = 0.045 # cameras distance above the base of the drone's legsfrom legs
+
+dat$altitude.fix <- dat$altitude + launch.chest + camera.height
+head(dat)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Next, we use the following formula to calculate Balaena's length according to the drone's data:
+  length = (alpha/image.width) * altitude * length.pixels
+
+$$
+length = \frac{alpha}{image.width}  \times true.altitude \times pixel.length 
+$$
+Where *alpha* is the camera's correction factor, estimated in the lab by measuring objects of known length and distance.
+This equation is reflected in the following function:
+
+```{r morphometry}
+morpho.length.alpha <- function(alpha = 1.2646,image.width, altitude, length.pixels){
+  length = (alpha/image.width) * altitude * length.pixels
+}
+```
+
+This results in the following estimated length for Balaena:
+```{r}
+dat$bal.length<- morpho.length.alpha(altitude = dat$altitude.fix,
+                                      image.width = dat$imageWidth,
+                                      length.pixels = dat$pixel.length)
+summary(dat$bal.length)
+
+```
+```{r estimate, fig.cap = "Histogram of Balaena's length estimated using the DJI Mini Drone. The red line shows Balaena's True length"}
+hist(dat$bal.length, breaks = 20, xlab = "estimated length of Balaena (m)", main = "")
+abline(v = 12.03, col = 2)
+```
+
