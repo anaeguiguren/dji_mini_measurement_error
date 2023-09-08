@@ -69,9 +69,8 @@ Next, we use the following formula to calculate Balaena’s length
 according to the drone’s data: length = (alpha/image.width) \* altitude
 \* length.pixels
 
-$$
-length = \frac{alpha}{image.width}  \times true.altitude \times pixel.length 
-$$
+$ length = true.altitude pixel.length $
+
 Where *alpha* is the camera’s correction factor, estimated in the lab by
 measuring objects of known length and distance. This equation is
 reflected in the following function:
