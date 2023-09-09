@@ -2,7 +2,7 @@
 title: "Bias and uncertainty in estimating length with DJI Mini 2"
 author: "Ana Eguiguren"
 date: "2023-09-06"
-output: md_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 setwd("/Users/anacristinaeguigurenburneo/Documents/DJI_Mini2_Measurement_Error/")
 
 source("Scripts/Gal23_DroneMeasurementError_DataPrep.R")
+library(ggplot2)
 
 ```
 
@@ -39,6 +40,7 @@ dat<- dat %>% select(Date, FlightNo, imageName, timeStamp, altitudeRaw = altitud
 ## Callibration data
 
 This Dataset has 426 images of Balaena taken during different flights and dates. 
+
 * altitudeRaw: the altitude indicated by DJI (zeroed at takeoff).
 
 * imageWidth: picture's width in pixels (1920 or 3840).
@@ -57,7 +59,7 @@ head(dat)
 The drone altitude is zeroed the moment the rotors start, which means that the true altitude needs to add the distance from the drone's launch point to the water:
 
 ![depiction of how the true altitude from the water line is calculated](Graphical/altitude_diagram.jpeg)
-*note that, in Balaena's case, the altitude we want is the distance from the drone to the boat, so we can omit the boat height in the calculation as follows:
+*note that, in Balaena's case, the altitude we want is the distance from the drone to the boat, so we can omit the boat height in the calculation as follows:*
 
 ```{r}
 #recalculate Balaena's length in m, with new altitude 
@@ -73,12 +75,14 @@ head(dat)
 Next, we use the following formula to calculate Balaena's length according to the drone's data:
   length = (alpha/image.width) * altitude * length.pixels
 
-$ length = \frac{alpha}{image.width}  \times true.altitude \times pixel.length $
+$$
+length = \frac{alpha}{image.width}  \times true.altitude \times pixel.length 
+$$
 
 Where *alpha* is the camera's correction factor, estimated in the lab by measuring objects of known length and distance.
 This equation is reflected in the following function:
 
-```{r morphometry}
+```{r }
 morpho.length.alpha <- function(alpha = 1.2646,image.width, altitude, length.pixels){
   length = (alpha/image.width) * altitude * length.pixels
 }
@@ -91,9 +95,133 @@ dat$bal.length<- morpho.length.alpha(altitude = dat$altitude.fix,
                                       length.pixels = dat$pixel.length)
 summary(dat$bal.length)
 
+
 ```
+
+
 ```{r estimate, fig.cap = "Histogram of Balaena's length estimated using the DJI Mini Drone. The red line shows Balaena's True length"}
 hist(dat$bal.length, breaks = 20, xlab = "estimated length of Balaena (m)", main = "")
-abline(v = 12.03, col = 2)
+abline(v = 12.03, col = 2, lwd = 2)
+```
+
+This means there is an under-estimate of Balaena's length of mean = 0.57m, and s.d. = 0.45
+```{r}
+dat$error <- dat$bal.length-12.03
+mean(dat$error)
+sd(dat$error)
+```
+## Questions
+
+* Am I doing something wrong? (in the formula?)
+
+
+
+* If not, where should the correction factor go - is it a constant that I add to the total, or is it specifically for the altitude?
+
+## Altitude experiment:
+I suspect that the majority of the error comes from bad altitude estimates. So I used our knowledge of Balaena's true length, assumed all other measurements were adequate, and calculated **true altitude**, and found that the good altitudes are further away from the measured altitudes at higher altitudes. For this, I used the formula:
+
+$$
+true.altitude = \frac{true.length}{pixel.length}  \times \frac{image.width}{alpha}
+$$
+```{r}
+true.altitude <- function(true.length, pixel.length, image.width, alpha){
+  t.a = (true.length/pixel.length) * (image.width/alpha)
+}
+
+dat$true.altitude <- true.altitude(true.length = 12.03, 
+                                   pixel.length = dat$pixel.length, 
+                                   image.width = dat$imageWidth, 
+                                   alpha = 1.2646)
+```
+
+Next, I estimated the altitude error as:
+```{r}
+dat$altitude.err <- dat$true.altitude - dat$altitude.fix
+dat$altitude.err.p <- dat$altitude.err/dat$true.altitude
+```
+
+
+Which results in the following error distribution:
+```{r}
+hist(dat$altitude.err, breaks = 30, xlab = "altitude error (m)", 
+     main = "")
+text(x = 20, y = 80, paste("mean error = ",signif(mean(dat$altitude.err), digits =3)))
+
+text(x = 20, y = 60, paste("s.d. = ",signif(sd(dat$altitude.err), digits =3)))
+
+
+```
+
+How does this look across altitudes?
+```{r}
+
+ggplot(dat, aes(x = true.altitude, y = altitude.err))+
+  geom_point(alpha = 0.5)+
+  theme(legend.position = "none")+ 
+  geom_smooth(method = "lm")
+  
+
+```
+
+How does **percent** error compare to altitude?
+
+```{r}
+
+ggplot(dat, aes(x = true.altitude, y = altitude.err.p))+
+  geom_point(alpha = 0.5)+
+  theme(legend.position = "none")+ 
+  geom_smooth(method = "lm")
+
+```
+Which looks like error is proportional, more than an added constant
+```{r}
+mean(dat$altitude.err.p)
+quantile(dat$altitude.err.p, probs = c(0.05, 0.95))
+```
+
+So if I add this percent altitude to my correction:
+```{r}
+dat$altitude.corr <-dat$altitude.fix*(1+mean(dat$altitude.err.p))
+
+
+dat$bal.length.c<- morpho.length.alpha(altitude =dat$altitude.corr,
+                                      image.width = dat$imageWidth,
+                                      length.pixels = dat$pixel.length)
+quantile(dat$bal.length.c, probs = c(0.05, 0.5, 0.95))
+
+```
+
+
+```{r}
+hist(dat$bal.length.c, breaks = 30, main = "", xlab = "estimated length")
+abline(v = 12.03, col = 2, lwd = 2)
+
+```
+Look at error pre & post correction
+```{r}
+dat$length.error.c <- dat$bal.length.c - 12.03 # corrected error raw
+dat$length.error.c.p <- (dat$length.error.c/dat$bal.length.c)*100
+
+dat$length.error.p <- (dat$error/dat$bal.length)*100
+
+e <- c(dat$length.error.c.p,dat$length.error.p)
+d <- data.frame(perc.error = e, error.type = rep(c("corrected", "uncorrected"), each = length(dat$bal.length)))
+
+```
+
+
+```{r fig3, fig.width = 15, fig.width = 2, fig.align="center"}
+
+ggplot(d, aes(x = error.type, y = perc.error, color = error.type))+
+  geom_boxplot()+
+    scale_y_continuous(limits=c(-60,60), breaks = seq(-60,60,10))+
+  labs(y = "corrected % error", x = "error type")+
+  theme(legend.position = "null")+
+  geom_hline(yintercept = 0)+
+  geom_hline(yintercept = -5, linetype = "dashed")+
+  geom_hline(yintercept = 5, linetype = "dashed")
+
+
 ```
 
