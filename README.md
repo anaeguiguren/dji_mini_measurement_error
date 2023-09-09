@@ -37,10 +37,16 @@ The drone altitude is zeroed the moment the rotors start, which means
 that the true altitude needs to add the distance from the drone’s launch
 point to the water:
 
-![depiction of how the true altitude from the water line is
-calculated](Graphical/altitude_diagram.jpeg) *note that, in Balaena’s
-case, the altitude we want is the distance from the drone to the boat,
-so we can omit the boat height in the calculation as follows:*
+<figure>
+<img src="Graphical/altitude_diagram.jpeg"
+alt="depiction of how the true altitude from the water line is calculated" />
+<figcaption aria-hidden="true">depiction of how the true altitude from
+the water line is calculated</figcaption>
+</figure>
+
+*Note that, in Balaena’s case, the altitude we want is the distance from
+the drone to the boat, so we can omit the boat height in the calculation
+as follows:*
 
     #recalculate Balaena's length in m, with new altitude 
     boat.height = 1.03- 0.24# balaena's altitude over the water - toe rail
@@ -178,8 +184,9 @@ How does **percent** error compare to altitude?
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](Readme_files/figure-markdown_strict/unnamed-chunk-10-1.png) Which
-looks like error is proportional, more than an added constant
+![](Readme_files/figure-markdown_strict/unnamed-chunk-10-1.png)
+
+Which looks like error is proportional, more than an added constant
 
     mean(dat$altitude.err.p)
 
@@ -206,8 +213,9 @@ So if I add this percent altitude to my correction:
     hist(dat$bal.length.c, breaks = 30, main = "", xlab = "estimated length")
     abline(v = 12.03, col = 2, lwd = 2)
 
-![](Readme_files/figure-markdown_strict/unnamed-chunk-13-1.png) Look at
-error pre & post correction
+![](Readme_files/figure-markdown_strict/unnamed-chunk-13-1.png)
+
+Look at error pre & post correction:
 
     dat$length.error.c <- dat$bal.length.c - 12.03 # corrected error raw
     dat$length.error.c.p <- (dat$length.error.c/dat$bal.length.c)*100
@@ -227,3 +235,5 @@ error pre & post correction
       geom_hline(yintercept = 5, linetype = "dashed")
 
 <img src="Readme_files/figure-markdown_strict/fig3-1.png" style="display: block; margin: auto;" />
+
+This looks pretty reasonable!

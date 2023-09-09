@@ -203,6 +203,8 @@ abline(v = 12.03, col = 2, lwd = 2)
 
 ```
 
+
+
 Look at error pre & post correction:
 ```{r}
 dat$length.error.c <- dat$bal.length.c - 12.03 # corrected error raw
