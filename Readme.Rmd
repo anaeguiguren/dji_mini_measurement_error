@@ -2,7 +2,7 @@
 title: "Bias and uncertainty in estimating length with DJI Mini 2"
 author: "Ana Eguiguren"
 date: "2023-09-06"
-output: html_document
+output: md_document
 ---
 
 ```{r setup, include=FALSE}
