@@ -234,6 +234,7 @@ ggplot(d, aes(x = error.type, y = perc.error, color = error.type))+
 
 
 This looks pretty reasonable!
+
 What is the 95% confidence interval:
 ```{r}
 quantile(dat$length.error.c.p, probs=c(0.05, 0.95))

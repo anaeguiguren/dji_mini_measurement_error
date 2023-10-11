@@ -237,3 +237,10 @@ Look at error pre & post correction:
 <img src="Readme_files/figure-markdown_strict/fig3-1.png" style="display: block; margin: auto;" />
 
 This looks pretty reasonable!
+
+What is the 95% confidence interval:
+
+    quantile(dat$length.error.c.p, probs=c(0.05, 0.95))
+
+    ##        5%       95% 
+    ## -7.821896  5.213527
