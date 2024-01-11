@@ -73,19 +73,21 @@ as follows:*
     ## 6       3840     287.1069    pos_o      121.145
 
 Next, we use the following formula to calculate Balaena’s length
-according to the drone’s data: length = (alpha/image.width) \* altitude
-\* length.pixels
+according to the drone’s data: length = alpha \* altitude \*
+length.pixels
 
-$$
-length = \frac{alpha}{image.width}  \times true.altitude \times pixel.length 
-$$
+*l**e**n**g**t**h* = *a**l**p**h**a* × *t**r**u**e*.*a**l**t**i**t**u**d**e* × *p**i**x**e**l*.*l**e**n**g**t**h*
 
 Where *alpha* is the camera’s correction factor, estimated in the lab by
-measuring objects of known length and distance. This equation is
-reflected in the following function:
+measuring objects of known length and distance. For the DJI Mini,
+*alpha* = 0.000328 at 3840, and *alpha* = 0.000656 at 1920 This equation
+is reflected in the following function:
 
-    morpho.length.alpha <- function(alpha = 1.2646,image.width, altitude, length.pixels){
-      length = (alpha/image.width) * altitude * length.pixels
+    morpho.length.alpha <- function(image.width, altitude, length.pixels){
+      alpha = ifelse(image.width == 3840, yes = 0.000328, no = 
+                       ifelse(image.width == 1920, yes = 0.000656, no = NA))
+      length = alpha * altitude * length.pixels
+      return(length)
     }
 
 This results in the following estimated length for Balaena:
@@ -96,7 +98,7 @@ This results in the following estimated length for Balaena:
     summary(dat$bal.length)
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##   9.457  11.212  11.493  11.458  11.754  12.966
+    ##   9.419  11.167  11.447  11.412  11.706  12.914
 
     hist(dat$bal.length, breaks = 20, xlab = "estimated length of Balaena (m)", main = "")
     abline(v = 12.03, col = 2, lwd = 2)
@@ -110,23 +112,21 @@ length</figcaption>
 </figure>
 
 This means there is an under-estimate of Balaena’s length of mean =
-0.57m, and s.d. = 0.45
+0.62, and s.d. = 0.48
 
     dat$error <- dat$bal.length-12.03
     mean(dat$error)
 
-    ## [1] -0.5721738
+    ## [1] -0.6182008
 
     sd(dat$error)
 
-    ## [1] 0.4805297
+    ## [1] 0.4785994
 
 ## Questions
 
--   Am I doing something wrong? (in the formula?)
-
--   If not, where should the correction factor go - is it a constant
-    that I add to the total, or is it specifically for the altitude?
+-   Where should the correction factor go - is it a constant that I add
+    to the total, or is it specifically for the altitude?
 
 ## Altitude experiment:
 
@@ -137,27 +137,30 @@ found that the good altitudes are further away from the measured
 altitudes at higher altitudes. For this, I used the formula:
 
 $$
-true.altitude = \frac{true.length}{pixel.length}  \times \frac{image.width}{alpha}
+true.altitude = \frac{true.length}{pixel.length}  \times alpha
 $$
 
-    true.altitude <- function(true.length, pixel.length, image.width, alpha){
-      t.a = (true.length/pixel.length) * (image.width/alpha)
+    true.altitude <- function(true.length, pixel.length, image.width){
+      alpha = ifelse(image.width == 3840, yes = 0.000328, no = 
+                       ifelse(image.width == 1920, yes = 0.000656, no = NA))
+      t.a = (true.length/(pixel.length* alpha))
+      return(t.a)
     }
 
     dat$true.altitude <- true.altitude(true.length = 12.03, 
                                        pixel.length = dat$pixel.length, 
-                                       image.width = dat$imageWidth, 
-                                       alpha = 1.2646)
+                                       image.width = dat$imageWidth)
 
-Next, I estimated the altitude error as:
+Next, I estimated the altitude error as a raw value and a percentage:
 
     dat$altitude.err <- dat$true.altitude - dat$altitude.fix
-    dat$altitude.err.p <- dat$altitude.err/dat$true.altitude
+    dat$altitude.err.p <- (dat$altitude.err/dat$true.altitude)
 
-Which results in the following error distribution:
+Which results in the following error distribution in cm:
 
     hist(dat$altitude.err, breaks = 30, xlab = "altitude error (m)", 
          main = "")
+
     text(x = 20, y = 80, paste("mean error = ",signif(mean(dat$altitude.err), digits =3)))
 
     text(x = 20, y = 60, paste("s.d. = ",signif(sd(dat$altitude.err), digits =3)))
@@ -190,12 +193,12 @@ Which looks like error is proportional, more than an added constant
 
     mean(dat$altitude.err.p)
 
-    ## [1] 0.04756224
+    ## [1] 0.05138826
 
     quantile(dat$altitude.err.p, probs = c(0.05, 0.95))
 
     ##           5%          95% 
-    ## -0.007102842  0.114652934
+    ## -0.003057229  0.118209445
 
 So if I add this percent altitude to my correction:
 
@@ -208,7 +211,7 @@ So if I add this percent altitude to my correction:
     quantile(dat$bal.length.c, probs = c(0.05, 0.5, 0.95))
 
     ##       5%      50%      95% 
-    ## 11.15730 12.03968 12.69169
+    ## 11.15306 12.03511 12.68687
 
     hist(dat$bal.length.c, breaks = 30, main = "", xlab = "estimated length")
     abline(v = 12.03, col = 2, lwd = 2)
@@ -243,4 +246,4 @@ What is the 95% confidence interval:
     quantile(dat$length.error.c.p, probs=c(0.05, 0.95))
 
     ##        5%       95% 
-    ## -7.821896  5.213527
+    ## -7.862824  5.177547
