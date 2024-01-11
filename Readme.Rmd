@@ -1,7 +1,7 @@
 ---
 title: "Bias and uncertainty in estimating length with DJI Mini 2"
 author: "Ana Eguiguren"
-date: "2024-01-10"
+date: "2023-09-06"
 output: md_document
 ---
 
@@ -43,7 +43,7 @@ This Dataset has 426 images of Balaena taken during different flights and dates.
 
 * altitudeRaw: the altitude indicated by DJI (zeroed at takeoff).
 
-* imageWidth: picture's width in pixels (1920 or 3840). - According to David, this should be changed to 4000
+* imageWidth: picture's width in pixels (1920 or 3840).
 
 * pixel.length: Balaena's length in pixels.
 
@@ -78,31 +78,23 @@ Next, we use the following formula to calculate Balaena's length according to th
   length = (alpha/image.width) * altitude * length.pixels
 
 $$
-length = \frac{pixel.dimension\times true.altitude}{focal.length}   \times pixel.length 
+length = \frac{alpha}{image.width}  \times true.altitude \times pixel.length 
 $$
 
+Where *alpha* is the camera's correction factor, estimated in the lab by measuring objects of known length and distance.
+This equation is reflected in the following function:
 
 ```{r }
-length.morphometrix <-function(px.dimension = 0.00155,
-                        altitude, 
-                        pixel.length){
-  #' @description all constant parameters are set to the DJI mini specs as a default
-  #' @param px.dimension the size of pixels in centimeters - default value is set for 4K video
-  #' @param altitude the drone's height over the water in meters
-  #' @param pixel.length the object's length in pixels
-  
-  GSD <- (px.dimension * altitude)/focal.length
-  length.m <- GSD * pixel.length
-  return(length.m)
+morpho.length.alpha <- function(alpha = 1.2646,image.width, altitude, length.pixels){
+  length = (alpha/image.width) * altitude * length.pixels
 }
 ```
 
-This results in the following estimated length for Balaena (for now, only for 4K resolution)
+This results in the following estimated length for Balaena:
 ```{r}
-
-dat <- dat[which(dat$imageWidth==3840),]
-dat$bal.length<- length.morphometrix(altitude = dat$altitude.fix,
-                                      pixel.length = dat$pixel.length)
+dat$bal.length<- morpho.length.alpha(altitude = dat$altitude.fix,
+                                      image.width = dat$imageWidth,
+                                      length.pixels = dat$pixel.length)
 summary(dat$bal.length)
 
 
@@ -121,6 +113,13 @@ mean(dat$error)
 sd(dat$error)
 ```
 
+## Questions
+
+* Am I doing something wrong? (in the formula?)
+
+
+
+* If not, where should the correction factor go - is it a constant that I add to the total, or is it specifically for the altitude?
 
 ## Altitude experiment:
 I suspect that the majority of the error comes from bad altitude estimates. So I used our knowledge of Balaena's true length, assumed all other measurements were adequate, and calculated **true altitude**, and found that the good altitudes are further away from the measured altitudes at higher altitudes. For this, I used the formula:
