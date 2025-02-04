@@ -76,8 +76,7 @@ as follows:*
     ## 6       3840     287.1069    pos_o  TRUE      121.145
 
 Next, we use the following formula to calculate Balaena’s length
-according to the drone’s data: length = alpha \* altitude \*
-length.pixels
+according to the drone’s data:
 
 *l**e**n**g**t**h* = *a**l**p**h**a* × *t**r**u**e*.*a**l**t**i**t**u**d**e* × *p**i**x**e**l*.*l**e**n**g**t**h*
 

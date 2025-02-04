@@ -74,8 +74,8 @@ dat$altitude.fix <- dat$altitude + launch.chest + camera.height
 head(dat)
 ```
 
+
 Next, we use the following formula to calculate Balaena's length according to the drone's data:
-  length = alpha * altitude * length.pixels
 
 $$
 length = alpha  \times true.altitude \times pixel.length 
