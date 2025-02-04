@@ -122,11 +122,14 @@ dat$altitude_error <- dat$altitude-as.numeric(dat$OSD.height..m.)
 #x<-dat[sample(which(abs(dat$altitude_error)>10), 10, replace = F),]
 
 #x<-dat[which(abs(dat$altitude_error)>10),] # omit the weird ones 
+#x <-dat[which(is.na(dat$GIMBAL.pitch)),]
+
+# classify photos as nadir, true or false:
 
 
-
+dat$nadir <- ifelse(dat$GIMBAL.pitch < -87, T, F)
 
 head(dat)
 
-rm(a);rm(f);rm(m);rm(s); rm(x); rm(d); rm(df_list)
+rm(a);rm(f);rm(m);rm(s)
 
