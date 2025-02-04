@@ -1,7 +1,7 @@
 ## Callibration data
 
-This Dataset has 426 images of Balaena taken during different flights
-and dates.
+This Dataset has 343 images of Balaena (at nadir) taken during different
+flights and dates.
 
 -   altitudeRaw: the altitude indicated by DJI (zeroed at takeoff).
 
@@ -11,6 +11,9 @@ and dates.
 
 -   position: whether Balaena was in the center of the frame (pos\_c) or
     closer to the edges (pos\_o).
+
+-   nadir: confirms that the the gimbal pitch during the screenshot was
+    &lt;- 87 degrees (i.e., close to perpendicular)
 
 <!-- -->
 
@@ -23,13 +26,13 @@ and dates.
     ## 4 2023-04-08      199 DJI_0006.MP4_00_03_11_vlc00002.png      3:11       120.1
     ## 5 2023-04-08      199 DJI_0006.MP4_00_03_14_vlc00003.png      3:14       120.3
     ## 6 2023-04-08      199 DJI_0006.MP4_00_03_16_vlc00004.png      3:16       119.7
-    ##   imageWidth pixel.length position
-    ## 1       3840     654.6037    pos_c
-    ## 2       3840     672.1734    pos_c
-    ## 3       3840     282.6148    pos_o
-    ## 4       3840     282.4793    pos_o
-    ## 5       3840     283.7345    pos_o
-    ## 6       3840     287.1069    pos_o
+    ##   imageWidth pixel.length position nadir
+    ## 1       3840     654.6037    pos_c  TRUE
+    ## 2       3840     672.1734    pos_c  TRUE
+    ## 3       3840     282.6148    pos_o  TRUE
+    ## 4       3840     282.4793    pos_o  TRUE
+    ## 5       3840     283.7345    pos_o  TRUE
+    ## 6       3840     287.1069    pos_o  TRUE
 
 ## Correct initial altitude
 
@@ -64,13 +67,13 @@ as follows:*
     ## 4 2023-04-08      199 DJI_0006.MP4_00_03_11_vlc00002.png      3:11       120.1
     ## 5 2023-04-08      199 DJI_0006.MP4_00_03_14_vlc00003.png      3:14       120.3
     ## 6 2023-04-08      199 DJI_0006.MP4_00_03_16_vlc00004.png      3:16       119.7
-    ##   imageWidth pixel.length position altitude.fix
-    ## 1       3840     654.6037    pos_c       51.845
-    ## 2       3840     672.1734    pos_c       51.145
-    ## 3       3840     282.6148    pos_o      120.845
-    ## 4       3840     282.4793    pos_o      121.545
-    ## 5       3840     283.7345    pos_o      121.745
-    ## 6       3840     287.1069    pos_o      121.145
+    ##   imageWidth pixel.length position nadir altitude.fix
+    ## 1       3840     654.6037    pos_c  TRUE       51.845
+    ## 2       3840     672.1734    pos_c  TRUE       51.145
+    ## 3       3840     282.6148    pos_o  TRUE      120.845
+    ## 4       3840     282.4793    pos_o  TRUE      121.545
+    ## 5       3840     283.7345    pos_o  TRUE      121.745
+    ## 6       3840     287.1069    pos_o  TRUE      121.145
 
 Next, we use the following formula to calculate Balaena’s length
 according to the drone’s data: length = alpha \* altitude \*
@@ -98,7 +101,7 @@ This results in the following estimated length for Balaena:
     summary(dat$bal.length)
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##   9.419  11.167  11.447  11.412  11.706  12.914
+    ##   10.09   11.21   11.46   11.48   11.75   12.73
 
     hist(dat$bal.length, breaks = 20, xlab = "estimated length of Balaena (m)", main = "")
     abline(v = 12.03, col = 2, lwd = 2)
@@ -117,11 +120,11 @@ This means there is an under-estimate of Balaena’s length of mean =
     dat$error <- dat$bal.length-12.03
     mean(dat$error)
 
-    ## [1] -0.6182008
+    ## [1] -0.546828
 
     sd(dat$error)
 
-    ## [1] 0.4785994
+    ## [1] 0.3796155
 
 ## Questions
 
@@ -156,7 +159,7 @@ Next, I estimated the altitude error as a raw value and a percentage:
     dat$altitude.err <- dat$true.altitude - dat$altitude.fix
     dat$altitude.err.p <- (dat$altitude.err/dat$true.altitude)
 
-Which results in the following error distribution in cm:
+Which results in the following error distribution in m:
 
     hist(dat$altitude.err, breaks = 30, xlab = "altitude error (m)", 
          main = "")
@@ -193,12 +196,12 @@ Which looks like error is proportional, more than an added constant
 
     mean(dat$altitude.err.p)
 
-    ## [1] 0.05138826
+    ## [1] 0.04545537
 
     quantile(dat$altitude.err.p, probs = c(0.05, 0.95))
 
-    ##           5%          95% 
-    ## -0.003057229  0.118209445
+    ##          5%         95% 
+    ## -0.00363185  0.09236528
 
 So if I add this percent altitude to my correction:
 
@@ -211,7 +214,7 @@ So if I add this percent altitude to my correction:
     quantile(dat$bal.length.c, probs = c(0.05, 0.5, 0.95))
 
     ##       5%      50%      95% 
-    ## 11.15306 12.03511 12.68687
+    ## 11.41517 11.98407 12.62251
 
     hist(dat$bal.length.c, breaks = 30, main = "", xlab = "estimated length")
     abline(v = 12.03, col = 2, lwd = 2)
@@ -246,4 +249,4 @@ What is the 95% confidence interval:
     quantile(dat$length.error.c.p, probs=c(0.05, 0.95))
 
     ##        5%       95% 
-    ## -7.862824  5.177547
+    ## -5.386118  4.694037

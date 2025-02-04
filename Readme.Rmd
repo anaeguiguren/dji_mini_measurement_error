@@ -1,7 +1,7 @@
 ---
 title: "Bias and uncertainty in estimating length with DJI Mini 2"
 author: "Ana Eguiguren"
-date: "2023-09-06"
+date: "2025-02-04"
 output: md_document
 ---
 
@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, include = FALSE}
-setwd("/Users/anacristinaeguigurenburneo/Documents/DJI_Mini2_Measurement_Error/")
+setwd("C:/Users/balae/Documents/dji_mini_measurement_error/")
 
 source("Scripts/Gal23_DroneMeasurementError_DataPrep.R")
 library(ggplot2)
@@ -28,14 +28,16 @@ dat$pixel.length <- px.length(l.m=dat$length,
                               p.d = dat$pixelDimension.old, 
                               a.m = dat$altitude)
 
-dat<- dat %>% select(Date, FlightNo, imageName, timeStamp, altitudeRaw = altitude, imageWidth = ImageWidth, pixel.length, position = pos)
+dat<- dat %>% select(Date, FlightNo, imageName, timeStamp, altitudeRaw = altitude, imageWidth = ImageWidth, pixel.length, position = pos, nadir = nadir) 
+
+dat<- dat[-which(dat$nadir==F),]
 
 ```
 
 
 ## Callibration data
 
-This Dataset has 426 images of Balaena taken during different flights and dates. 
+This Dataset has 343 images of Balaena (at nadir) taken during different flights and dates. 
 
 * altitudeRaw: the altitude indicated by DJI (zeroed at takeoff).
 
@@ -44,6 +46,8 @@ This Dataset has 426 images of Balaena taken during different flights and dates.
 * pixel.length: Balaena's length in pixels.
 
 * position: whether Balaena was in the center of the frame (pos_c) or closer to the edges (pos_o).
+
+* nadir: confirms that the the gimbal pitch during the screenshot was <- 87 degrees (i.e., close to perpendicular) 
 
 
 
@@ -142,7 +146,7 @@ dat$altitude.err.p <- (dat$altitude.err/dat$true.altitude)
 ```
 
 
-Which results in the following error distribution in cm:
+Which results in the following error distribution in m:
 ```{r}
 hist(dat$altitude.err, breaks = 30, xlab = "altitude error (m)", 
      main = "")
