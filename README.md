@@ -78,7 +78,7 @@ as follows:*
 Next, we use the following formula to calculate Balaena’s length
 according to the drone’s data:
 
-*l**e**n**g**t**h* = *α* × true altitude × pixel length
+*l**e**n**g**t**h* = alpha × true altitude × pixel length
 
 Where *alpha* is the camera’s correction factor, estimated in the lab by
 measuring objects of known length and distance. For the DJI Mini,

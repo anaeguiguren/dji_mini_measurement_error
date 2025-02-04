@@ -77,8 +77,7 @@ head(dat)
 
 Next, we use the following formula to calculate Balaena's length according to the drone's data:
 
-$$
-length = \alpha \times \text{true altitude} \times \text{pixel length}
+$$ length = \text{alpha} \times \text{true altitude} \times \text{pixel length}
 $$
 
 Where *alpha* is the camera's correction factor, estimated in the lab by measuring objects of known length and distance. For the DJI Mini, *alpha* = 0.000328 at 3840, and *alpha* = 0.000656 at 1920
