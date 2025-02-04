@@ -69,8 +69,11 @@ d <- data.frame(length = balaena.length,
                 angle = dat$balaenaAngled, 
                 position = dat$pos, 
                 flightNo = dat$FlightNo, 
-                date = dat$Date)
+                date = dat$Date, 
+                nadir = dat$nadir)
 
+#keep only images with known nadir
+d <- d[-which(is.na(d$nadir)),]
 
 # ~~~ a. overall error ----
 #total
@@ -86,7 +89,26 @@ mean(d$length.error.abs)
 sd(d$length.error.abs)
 
 
-# ~~~ b. error as a function of altitude ----
+# ~~~ b. error as a function of gimbal angle -----
+
+ggplot(data = d, aes(x = nadir, y = length.error.abs))+
+  geom_boxplot()+
+  geom_jitter(color="black", size=0.4, alpha=0.9) 
+
+
+
+m.gimb.abs <- (lm(length.error.abs~as.factor(nadir), data=d))
+summary(m.gimb.tot)# super significant!
+
+confint(m.gimb.abs, level = 0.90)
+
+
+# remove non-nadir images from analysis
+
+
+# ~~~ c. error as a function of altitude ----
+
+d<- d[-which(d$nadir==F),]
 #total error
 
 ggplot(data = d,aes(x = altitude, y = length.error))+
@@ -104,7 +126,7 @@ confint(m.tot, 'altitude',level = 0.90)
 ggplot(data = d,aes(x = altitude, y = length.error.abs))+
   geom_point(alpha = 0.5, col = "darkcyan")+
   geom_smooth(method = "lm", color = "black")+
-  xlab("altitude (m)") + ylab("total error (m)")+
+  xlab("altitude (m)") + ylab("absolute error (m)")+
   theme_classic()
 
 m.abs <- (lm(length.error.abs~altitude, data=d))
@@ -117,7 +139,12 @@ summary(m.pos.tot)
 confint(m.pos.tot, 'positionpos_o',level = 0.90)
 
 
-m.pos.abs <- (lm(length.error.abs~position, data=d))
+ggplot(data = d, aes(x = position, y = length.error.abs))+
+  geom_boxplot()+
+  geom_jitter(color="black", size=0.4, alpha=0.9) 
+
+
+m.pos.abs <- (lm(length.error.abs~factor(position), data=d))
 summary(m.pos.abs)
 confint(m.pos.abs, 'positionpos_o',level = 0.90)
 
@@ -126,20 +153,20 @@ library(nlme)
 
 # total error:
 m.int <- gls(length.error~ 1, data = d, method = "ML")
-summary(m.int) #588.87
+summary(m.int) #308.7682
 intervals(m.int, level = 0.9)
 
 
 # model random intercept :
 m.rand <- lme(length.error ~ 1, data = d, method = "ML",
               random = ~1|flightNo)
-summary(m.rand) #522.48
+summary(m.rand) # 171.4672
 intervals(m.rand, level = 0.9)
 
 # add altitude:
 m.rand.alt <- lme(length.error ~ altitude, data = d, method = "ML",
               random = ~1|flightNo)
-anova(m.rand, m.rand.alt)# does not help!
+anova(m.rand, m.rand.alt)# does help!
 summary(m.rand.alt)
 intervals(m.rand.alt, level = 0.9)
 
@@ -175,14 +202,14 @@ ggplot(d, aes(x = position, y = length.error))+
 
 
 m.int.abs <- gls(length.error.abs~ 1, data = d, method = "ML")
-summary(m.int.abs) 
+summary(m.int.abs)#  225.675  
 intervals(m.int.abs, level = 0.9)
 
 
 # model random intercept :
 m.rand.abs <- lme(length.error.abs ~ 1, data = d, method = "ML",
               random = ~1|flightNo)
-summary(m.rand.abs) 
+summary(m.rand.abs) # 98.8
 intervals(m.rand.abs, level = 0.9)
 anova(m.int.abs, m.rand.abs)
 
@@ -204,7 +231,7 @@ summary(m.rand.pos)
 anova(m.rand, m.rand.pos)
 
 
-ggplot(d, aes(x = position, y = length.error))+
+ggplot(d, aes(x = position, y = length.error.abs))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE, alpha=0.6)+
   geom_jitter(color = "black", size = 1, alpha = 0.6)+
@@ -220,7 +247,7 @@ ggplot(d, aes(x = flightNo, y = length.error.abs, fill = date))+
   theme(axis.text.x=element_text(angle = 90, size = 5))
 
 
-ggplot(d, aes(x = flightNo, y = length.error, fill = date))+
+ggplot(d, aes(x = flightNo, y = length.error.abs, fill = date))+
     geom_boxplot()+
     scale_fill_viridis(discrete = TRUE, alpha=0.6)+
     geom_jitter(color = "black", size = 0.4, alpha = 0.6)
