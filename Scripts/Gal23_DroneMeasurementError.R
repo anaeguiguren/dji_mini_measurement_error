@@ -1,8 +1,9 @@
 # Set working directory---
-setwd("/Users/anacristinaeguigurenburneo/Documents/DJI_Mini2_Measurement_Error/")
+#setwd("/Users/anacristinaeguigurenburneo/Documents/DJI_Mini2_Measurement_Error/")
 
 
 source("Scripts/Gal23_DroneMeasurementError_DataPrep.R")
+library(viridisLite)
 
 
 # 1. Extract pixel length given the measurements used in morphometrix----

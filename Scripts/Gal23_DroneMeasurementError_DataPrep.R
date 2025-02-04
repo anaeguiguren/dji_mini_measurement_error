@@ -117,11 +117,11 @@ dat <- left_join(dat, d, by = "datetime_utc6")
 
 dat$altitude_error <- dat$altitude-as.numeric(dat$OSD.height..m.)
 
-hist(dat$altitude_error, breaks = 20)
+#hist(dat$altitude_error, breaks = 20)
 
-x<-dat[sample(which(abs(dat$altitude_error)>10), 10, replace = F),]
+#x<-dat[sample(which(abs(dat$altitude_error)>10), 10, replace = F),]
 
-x<-dat[which(abs(dat$altitude_error)>10),] # omit the weird ones 
+#x<-dat[which(abs(dat$altitude_error)>10),] # omit the weird ones 
 
 
 
