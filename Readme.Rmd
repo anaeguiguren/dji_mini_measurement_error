@@ -1,7 +1,7 @@
 ---
 title: "Bias and uncertainty in estimating length with DJI Mini 2"
 author: "Ana Eguiguren"
-date: "2025-02-04"
+date: "2025-03-18"
 output: md_document
 ---
 
@@ -158,9 +158,9 @@ Which results in the following error distribution for the altitude in m:
 hist(dat$altitude.err, breaks = 30, xlab = "altitude error (m)", 
      main = "")
 
-text(x = 20, y = 80, paste("mean error = ",signif(mean(dat$altitude.err), digits =3)))
+text(x = 10, y = 40, paste("mean error = ",signif(mean(dat$altitude.err), digits =3)))
 
-text(x = 20, y = 60, paste("s.d. = ",signif(sd(dat$altitude.err), digits =3)))
+text(x = 10, y = 35, paste("s.d. = ",signif(sd(dat$altitude.err), digits =3)))
 
 
 ```
@@ -188,21 +188,21 @@ library(nlme)
 
 # should it be hierarchical?
 m.int <- gls(true.altitude ~ altitude.fix, data = dat, method = "ML")
-summary(m.int) #1430.031	
+summary(m.int) #AIC = 1405.26/ BIC = 1416.77	
 intervals(m.int, level = 0.9)
 
 
 # model random intercept :
 m.rand <- lme(true.altitude ~ altitude.fix, data = dat, method = "ML",
-              random = ~1|FlightNo)# 
-summary(m.rand) # 1269.683	- probably yes?
+              random = ~1|Date)# 
+summary(m.rand) # AIC = 1389.933 BIC = 1405.284	- probably yes?
 
 
 intervals(m.rand, level = 0.9)
 
 # add altitude:
 m.rand.alt <- lme(altitude.err ~ true.altitude, data = dat, method = "ML",
-              random = ~1|FlightNo)
+              random = ~1|Date)
 anova(m.rand, m.int)# does help!
 summary(m.rand.alt)# 1182.965	
 intervals(m.rand.alt, level = 0.9)
@@ -233,9 +233,9 @@ quantile(dat$altitude.err.p, probs = c(0.05, 0.95))
 
 
 
-So if I add the result from the gls model:
+So if I add the result from the gls non.hierarchical model:
 ```{r}
-dat$altitude.corr <-0.47 + dat$altitude.fix*1.04
+dat$altitude.corr <-1.40 + dat$altitude.fix*1.017
 
 
 

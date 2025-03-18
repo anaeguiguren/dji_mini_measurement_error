@@ -166,9 +166,9 @@ Which results in the following error distribution for the altitude in m:
     hist(dat$altitude.err, breaks = 30, xlab = "altitude error (m)", 
          main = "")
 
-    text(x = 20, y = 80, paste("mean error = ",signif(mean(dat$altitude.err), digits =3)))
+    text(x = 10, y = 40, paste("mean error = ",signif(mean(dat$altitude.err), digits =3)))
 
-    text(x = 20, y = 60, paste("s.d. = ",signif(sd(dat$altitude.err), digits =3)))
+    text(x = 10, y = 35, paste("s.d. = ",signif(sd(dat$altitude.err), digits =3)))
 
 ![](Readme_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
@@ -197,7 +197,7 @@ Can I model true altitude based on barometric altitude?
 
     # should it be hierarchical?
     m.int <- gls(true.altitude ~ altitude.fix, data = dat, method = "ML")
-    summary(m.int) #1430.031    
+    summary(m.int) #AIC = 1405.26/ BIC = 1416.77    
 
     ## Generalized least squares fit by maximum likelihood
     ##   Model: true.altitude ~ altitude.fix 
@@ -236,105 +236,105 @@ Can I model true altitude based on barometric altitude?
 
     # model random intercept :
     m.rand <- lme(true.altitude ~ altitude.fix, data = dat, method = "ML",
-                  random = ~1|FlightNo)# 
-    summary(m.rand) # 1269.683  - probably yes?
+                  random = ~1|Date)# 
+    summary(m.rand) # AIC = 1389.933 BIC = 1405.284 - probably yes?
 
     ## Linear mixed-effects model fit by maximum likelihood
     ##   Data: dat 
     ##        AIC      BIC    logLik
-    ##   1209.342 1224.693 -600.6712
+    ##   1389.933 1405.284 -690.9664
     ## 
     ## Random effects:
-    ##  Formula: ~1 | FlightNo
+    ##  Formula: ~1 | Date
     ##         (Intercept) Residual
-    ## StdDev:    1.560453 1.083304
+    ## StdDev:   0.5822751 1.769358
     ## 
     ## Fixed effects:  true.altitude ~ altitude.fix 
-    ##                  Value Std.Error  DF   t-value p-value
-    ## (Intercept)  0.4708911 0.3002126 258   1.56853   0.118
-    ## altitude.fix 1.0357809 0.0042905 258 241.41272   0.000
+    ##                 Value  Std.Error  DF   t-value p-value
+    ## (Intercept)  1.200652 0.27882293 324   4.30615       0
+    ## altitude.fix 1.020027 0.00360891 324 282.64151       0
     ##  Correlation: 
     ##              (Intr)
-    ## altitude.fix -0.786
+    ## altitude.fix -0.748
     ## 
     ## Standardized Within-Group Residuals:
     ##         Min          Q1         Med          Q3         Max 
-    ## -3.37722990 -0.45559838  0.05796488  0.41499318  5.39086086 
+    ## -3.93670875 -0.55193758  0.02940306  0.50419569  4.45160196 
     ## 
     ## Number of Observations: 343
-    ## Number of Groups: 84
+    ## Number of Groups: 18
 
     intervals(m.rand, level = 0.9)
 
     ## Approximate 90% confidence intervals
     ## 
     ##  Fixed effects:
-    ##                    lower      est.     upper
-    ## (Intercept)  -0.02324717 0.4708911 0.9650293
-    ## altitude.fix  1.02871890 1.0357809 1.0428429
+    ##                 lower     est.    upper
+    ## (Intercept)  0.742057 1.200652 1.659247
+    ## altitude.fix 1.014091 1.020027 1.025963
     ## 
     ##  Random Effects:
-    ##   Level: FlightNo 
-    ##                    lower     est.    upper
-    ## sd((Intercept)) 1.333379 1.560453 1.826198
+    ##   Level: Date 
+    ##                     lower      est.     upper
+    ## sd((Intercept)) 0.3597236 0.5822751 0.9425135
     ## 
     ##  Within-group standard error:
     ##    lower     est.    upper 
-    ## 1.006936 1.083304 1.165464
+    ## 1.658987 1.769358 1.887073
 
     # add altitude:
     m.rand.alt <- lme(altitude.err ~ true.altitude, data = dat, method = "ML",
-                  random = ~1|FlightNo)
+                  random = ~1|Date)
     anova(m.rand, m.int)# does help!
 
-    ##        Model df      AIC      BIC    logLik   Test L.Ratio p-value
-    ## m.rand     1  4 1209.342 1224.693 -600.6712                       
-    ## m.int      2  3 1405.260 1416.774 -699.6302 1 vs 2 197.918  <.0001
+    ##        Model df      AIC      BIC    logLik   Test  L.Ratio p-value
+    ## m.rand     1  4 1389.933 1405.284 -690.9664                        
+    ## m.int      2  3 1405.260 1416.774 -699.6302 1 vs 2 17.32749  <.0001
 
     summary(m.rand.alt)# 1182.965   
 
     ## Linear mixed-effects model fit by maximum likelihood
     ##   Data: dat 
-    ##        AIC      BIC    logLik
-    ##   1182.965 1198.316 -587.4823
+    ##        AIC     BIC    logLik
+    ##   1374.739 1390.09 -683.3694
     ## 
     ## Random effects:
-    ##  Formula: ~1 | FlightNo
+    ##  Formula: ~1 | Date
     ##         (Intercept) Residual
-    ## StdDev:     1.57006 1.030225
+    ## StdDev:   0.6334224 1.724881
     ## 
     ## Fixed effects:  altitude.err ~ true.altitude 
-    ##                    Value Std.Error  DF   t-value p-value
-    ## (Intercept)   0.08780486 0.2956846 258  0.296954  0.7667
-    ## true.altitude 0.04093958 0.0040099 258 10.209628  0.0000
+    ##                   Value Std.Error  DF  t-value p-value
+    ## (Intercept)   0.8938926 0.2866947 324 3.117925   0.002
+    ## true.altitude 0.0242220 0.0034875 324 6.945381   0.000
     ##  Correlation: 
     ##               (Intr)
-    ## true.altitude -0.779
+    ## true.altitude -0.737
     ## 
     ## Standardized Within-Group Residuals:
     ##         Min          Q1         Med          Q3         Max 
-    ## -3.43058937 -0.47390381  0.05549121  0.41167208  5.08073943 
+    ## -4.05616585 -0.54939958  0.06462783  0.52316612  4.30677559 
     ## 
     ## Number of Observations: 343
-    ## Number of Groups: 84
+    ## Number of Groups: 18
 
     intervals(m.rand.alt, level = 0.9)
 
     ## Approximate 90% confidence intervals
     ## 
     ##  Fixed effects:
-    ##                     lower       est.      upper
-    ## (Intercept)   -0.39888055 0.08780486 0.57449027
-    ## true.altitude  0.03433944 0.04093958 0.04753972
+    ##                    lower       est.      upper
+    ## (Intercept)   0.42235036 0.89389259 1.36543482
+    ## true.altitude 0.01848596 0.02422204 0.02995813
     ## 
     ##  Random Effects:
-    ##   Level: FlightNo 
-    ##                    lower    est.    upper
-    ## sd((Intercept)) 1.342338 1.57006 1.836414
+    ##   Level: Date 
+    ##                     lower      est.    upper
+    ## sd((Intercept)) 0.3898258 0.6334224 1.029239
     ## 
     ##  Within-group standard error:
-    ##     lower      est.     upper 
-    ## 0.9570976 1.0302250 1.1089397
+    ##    lower     est.    upper 
+    ## 1.616822 1.724881 1.840161
 
 How does **percent** error compare to altitude?
 
@@ -358,9 +358,9 @@ Which looks like error is proportional, more than an added constant
     ##          5%         95% 
     ## -0.00363185  0.09236528
 
-So if I add the result from the gls model:
+So if I add the result from the gls non.hierarchical model:
 
-    dat$altitude.corr <-0.47 + dat$altitude.fix*1.04
+    dat$altitude.corr <-1.40 + dat$altitude.fix*1.017
 
 
 
@@ -370,7 +370,7 @@ So if I add the result from the gls model:
     quantile(dat$bal.length.c, probs = c(0.05, 0.5, 0.95))
 
     ##       5%      50%      95% 
-    ## 11.49302 12.04951 12.68317
+    ## 11.50748 12.00834 12.68490
 
     hist(dat$bal.length.c, breaks = 30, main = "", xlab = "estimated length")
     abline(v = 12.03, col = 2, lwd = 2)
@@ -405,4 +405,4 @@ What is the 95% confidence interval:
     quantile(dat$length.error.c.p, probs=c(0.05, 0.95))
 
     ##        5%       95% 
-    ## -4.672249  5.149910
+    ## -4.540695  5.162811
